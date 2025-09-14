@@ -18,7 +18,7 @@ pub fn fen_to_board(fen: &str) -> Result<Board, String> {
     parse_fen_en_passant(&mut board, parts[3])?;
 
     board.state.halfmove_clock = parts.get(4).and_then(|s| s.parse().ok()).unwrap_or(0);
-    // TODO: hash
+    board.recalculate_hash();
 
     Ok(board)
 }

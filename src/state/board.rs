@@ -1,5 +1,5 @@
-use super::{Color, ColoredPiece, GenericPiece};
-use crate::util::clear_lsb;
+use super::{Color, ColoredPiece, GenericPiece, hash::calculate_hash};
+use crate::util::bithelpers::BitFunctions;
 
 #[derive(Debug, Clone)]
 pub struct Board {
@@ -60,11 +60,15 @@ impl Board {
         self.piece_table = [None; 64];
         for (i, mut bb) in self.pieces.iter().copied().enumerate() {
             while bb != 0 {
-                let lsb_index = bb.trailing_zeros();
+                let lsb_index = bb.pop_lsb();
                 let piece = ColoredPiece::from_index(i).map(|p| p.generic());
                 self.piece_table[lsb_index as usize] = piece;
-                clear_lsb(&mut bb);
             }
         }
+    }
+
+    /// recalculates and sets the board hash from scratch
+    pub fn recalculate_hash(&mut self) {
+        self.state.hash = calculate_hash(self);
     }
 }

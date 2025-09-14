@@ -1,3 +1,5 @@
+use strum_macros::EnumIter;
+
 pub mod board;
 pub mod fen;
 pub mod hash;
@@ -21,7 +23,7 @@ pub enum Color {
 }
 
 #[repr(usize)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, EnumIter)]
 pub enum ColoredPiece {
     WhitePawn = 0,
     BlackPawn = 1,
