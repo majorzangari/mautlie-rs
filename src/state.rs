@@ -1,5 +1,6 @@
 pub mod board;
 pub mod fen;
+pub mod hash;
 
 #[repr(u8)]
 #[derive(Debug, Clone, Copy)]

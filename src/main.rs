@@ -5,5 +5,5 @@ mod state;
 mod util;
 
 fn main() {
-    println!("Hello, world!");
+    println!("WIP");
 }
