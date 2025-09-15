@@ -5,7 +5,7 @@ pub mod fen;
 pub mod hash;
 
 #[repr(u8)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum GenericPiece {
     Pawn = 0,
     Knight = 1,

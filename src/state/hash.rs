@@ -63,6 +63,7 @@ const fn generate_en_passant_hash() -> [u64; 8] {
     table
 }
 
+/// returns the hash of the given castling right
 fn get_castling_hash(castling_rights: u8) -> u64 {
     let mut hash = 0;
     if castling_rights.contains(castling_rights::WHITE_SHORT) {
@@ -80,6 +81,7 @@ fn get_castling_hash(castling_rights: u8) -> u64 {
     hash
 }
 
+/// returns the Zobrist hash of the given board position
 pub fn calculate_hash(board: &Board) -> u64 {
     let mut hash = 0;
 

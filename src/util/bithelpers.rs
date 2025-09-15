@@ -2,7 +2,10 @@ pub trait BitFunctions {
     type Type;
 
     fn pop_lsb(&mut self) -> u32;
+    fn get_lsb(self) -> u32;
+    fn clear_lsb(&mut self);
     fn contains(self, other: Self::Type) -> bool;
+    fn count_set_bits(self) -> u32;
 }
 
 macro_rules! impl_bit_functions {
@@ -17,9 +20,24 @@ macro_rules! impl_bit_functions {
                 out
             }
 
+            /// return the index of the least significant bit
+            fn get_lsb(self) -> u32 {
+                self.trailing_zeros()
+            }
+
+            /// removes the least significant bit from self (or does nothing if self is 0)
+            fn clear_lsb(&mut self) {
+                *self &= *self - 1;
+            }
+
             /// return true if self contains any bits in other
             fn contains(self, other: Self::Type) -> bool {
                 (self & other) != 0
+            }
+
+            /// return the number of set bits
+            fn count_set_bits(self) -> u32 {
+                self.count_ones()
             }
         }
     };
