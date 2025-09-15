@@ -20,6 +20,7 @@ pub fn fen_to_board(fen: &str) -> Result<Board, String> {
     board.state.halfmove_clock = parts.get(4).and_then(|s| s.parse().ok()).unwrap_or(0);
     board.recalculate_hash();
 
+    board.check_representation();
     Ok(board)
 }
 
@@ -30,30 +31,32 @@ fn parse_fen_pieces(board: &mut Board, pieces: &str) -> Result<(), String> {
     let mut file = 0;
     for c in pieces.chars() {
         let square_index = rank * 8 + file;
-        let square_bit = 1 << square_index;
         match c {
-            'P' => board.pieces[ColoredPiece::WhitePawn   as usize] |= square_bit,
-            'N' => board.pieces[ColoredPiece::WhiteKnight as usize] |= square_bit,
-            'B' => board.pieces[ColoredPiece::WhiteBishop as usize] |= square_bit,
-            'R' => board.pieces[ColoredPiece::WhiteRook   as usize] |= square_bit,
-            'Q' => board.pieces[ColoredPiece::WhiteQueen  as usize] |= square_bit,
-            'K' => board.pieces[ColoredPiece::WhiteKing   as usize] |= square_bit,
-            'p' => board.pieces[ColoredPiece::BlackPawn   as usize] |= square_bit,
-            'n' => board.pieces[ColoredPiece::BlackKnight as usize] |= square_bit,
-            'b' => board.pieces[ColoredPiece::BlackBishop as usize] |= square_bit,
-            'r' => board.pieces[ColoredPiece::BlackRook   as usize] |= square_bit,
-            'q' => board.pieces[ColoredPiece::BlackQueen  as usize] |= square_bit,
-            'k' => board.pieces[ColoredPiece::BlackKing   as usize] |= square_bit,
+            'P' => board.pieces[ColoredPiece::WhitePawn   as usize] |= 1 << square_index,
+            'N' => board.pieces[ColoredPiece::WhiteKnight as usize] |= 1 << square_index,
+            'B' => board.pieces[ColoredPiece::WhiteBishop as usize] |= 1 << square_index,
+            'R' => board.pieces[ColoredPiece::WhiteRook   as usize] |= 1 << square_index,
+            'Q' => board.pieces[ColoredPiece::WhiteQueen  as usize] |= 1 << square_index,
+            'K' => board.pieces[ColoredPiece::WhiteKing   as usize] |= 1 << square_index,
+            'p' => board.pieces[ColoredPiece::BlackPawn   as usize] |= 1 << square_index,
+            'n' => board.pieces[ColoredPiece::BlackKnight as usize] |= 1 << square_index,
+            'b' => board.pieces[ColoredPiece::BlackBishop as usize] |= 1 << square_index,
+            'r' => board.pieces[ColoredPiece::BlackRook   as usize] |= 1 << square_index,
+            'q' => board.pieces[ColoredPiece::BlackQueen  as usize] |= 1 << square_index,
+            'k' => board.pieces[ColoredPiece::BlackKing   as usize] |= 1 << square_index,
             '0'..='8' => {
                 let empty_squares = c.to_digit(10).ok_or("Invalid digit in FEN string")?;
                 file += empty_squares;
+                continue;
             }
             '/' => {
                 rank -= 1;
                 file = 0;
+                continue;
             }
             _ => return Err("Invalid character in FEN string".to_string()),
         }
+        file += 1;
     }
     board.update_occupied();
     board.update_piece_table();

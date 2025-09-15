@@ -78,7 +78,7 @@ impl Board {
     /// panics if the board is in an invalid state
     /// does nothing in release builds
     #[cfg(debug_assertions)]
-    pub fn validate_board(&self) {
+    pub fn check_representation(&self) {
         let mut calculated_occupied = [0; 2];
         for piece in ColoredPiece::iter() {
             calculated_occupied[piece.color() as usize] |= self.pieces[piece as usize];
@@ -145,7 +145,7 @@ impl Board {
     }
 
     #[cfg(not(debug_assertions))]
-    pub fn validate_board(&self) {
+    pub fn check_representation(&self) {
         // no-op in release builds
     }
 }

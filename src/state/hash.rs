@@ -89,11 +89,11 @@ pub fn calculate_hash(board: &Board) -> u64 {
         let mut bb = board.pieces[piece as usize];
         while bb != 0 {
             let lsb_index = bb.pop_lsb() as usize;
-            hash ^= PIECE_HASH[piece as usize][lsb_index];
+            hash ^= PIECE_HASH[lsb_index][piece as usize];
         }
     }
 
-    if matches!(board.side_to_move, Color::White) {
+    if matches!(board.side_to_move, Color::Black) {
         hash ^= SIDE_HASH;
     }
 
