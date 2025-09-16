@@ -1,8 +1,11 @@
 use strum_macros::EnumIter;
 
 pub mod board;
+pub mod board_move_gen;
 pub mod fen;
 pub mod hash;
+
+mod piece_move_gen;
 
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq)]
