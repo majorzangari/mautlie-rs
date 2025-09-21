@@ -311,10 +311,26 @@ pub fn get_king_moves_bb(square: u8, friendly_occ: u64) -> u64 {
 
 pub fn get_bishop_moves_bb(square: u8, friendly_occ: u64, enemy_occ: u64) -> u64 {
     debug_assert!(square < 64);
-    todo!();
+    let info = &BISHOP_MAGIC_INFO
+        .get()
+        .expect("Bishop magic info not initialized")[square as usize];
+
+    let blockers = (friendly_occ | enemy_occ) & info.mask;
+    let index = blockers.wrapping_mul(info.magic) >> info.shift;
+
+    debug_assert!(index < info.attacks.len() as u64);
+    info.attacks[index as usize]
 }
 
 pub fn get_rook_moves_bb(square: u8, friendly_occ: u64, enemy_occ: u64) -> u64 {
     debug_assert!(square < 64);
-    todo!();
+    let info = &ROOK_MAGIC_INFO
+        .get()
+        .expect("Rook magic info not initialized")[square as usize];
+
+    let blockers = (friendly_occ | enemy_occ) & info.mask;
+    let index = blockers.wrapping_mul(info.magic) >> info.shift;
+
+    debug_assert!(index < info.attacks.len() as u64);
+    info.attacks[index as usize]
 }
