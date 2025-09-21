@@ -2,9 +2,9 @@ import random as rand
 import numpy as np
 
 RANK_1: np.uint64 = np.uint64(0x00000000000000FF)
-FILE_A: np.uint64 = np.uint64(0x8080808080808080)
+FILE_H: np.uint64 = np.uint64(0x8080808080808080)
 RANK_8: np.uint64 = np.uint64(0xFF00000000000000)
-FILE_H: np.uint64 = np.uint64(0x0101010101010101)
+FILE_A: np.uint64 = np.uint64(0x0101010101010101)
 
 
 def get_blocker_mask(square: int) -> np.uint64:
@@ -108,7 +108,6 @@ def find_magic(square: int) -> np.uint64:
 
 
 if __name__ == "__main__":
-    np.seterr(over="ignore")
     for i in range(64):
         magic = find_magic(i)
         print(hex(magic) + ",")

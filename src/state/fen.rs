@@ -10,14 +10,31 @@ pub fn fen_to_board(fen: &str) -> Result<Board, String> {
         return Err("FEN string must have at least 4 parts".to_string());
     }
 
-    let mut board = Board::default();
+    let mut board = Board::empty();
 
     parse_fen_pieces(&mut board, parts[0])?;
     parse_fen_side_to_move(&mut board, parts[1])?;
     parse_fen_castling_rights(&mut board, parts[2])?;
     parse_fen_en_passant(&mut board, parts[3])?;
 
-    board.state.halfmove_clock = parts.get(4).and_then(|s| s.parse().ok()).unwrap_or(0);
+    board.state.halfmove_clock = if let Some(s) = parts.get(4) {
+        match s.parse() {
+            Ok(n) => n,
+            Err(_) => return Err("Invalid halfmove number in FEN string".to_string()),
+        }
+    } else {
+        0
+    };
+
+    board.fullmove_clock = if let Some(s) = parts.get(5) {
+        match s.parse() {
+            Ok(n) => n,
+            Err(_) => return Err("Invalid fullmove number in FEN string".to_string()),
+        }
+    } else {
+        1
+    };
+
     board.recalculate_hash();
 
     board.check_representation();
@@ -117,4 +134,8 @@ fn parse_fen_en_passant(board: &mut Board, en_passant: &str) -> Result<(), Strin
     let square_index = rank_index * 8 + file_index;
     board.state.en_passant = 1 << square_index;
     Ok(())
+}
+
+pub fn board_to_fen(board: &Board) -> String {
+    todo!();
 }

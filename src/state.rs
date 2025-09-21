@@ -81,6 +81,26 @@ impl ColoredPiece {
     }
 }
 
+pub mod game_constants {
+    pub const RANK_1: u64 = 0x00000000000000FF;
+    pub const RANK_2: u64 = 0x000000000000FF00;
+    pub const RANK_3: u64 = 0x0000000000FF0000;
+    pub const RANK_4: u64 = 0x00000000FF000000;
+    pub const RANK_5: u64 = 0x000000FF00000000;
+    pub const RANK_6: u64 = 0x0000FF0000000000;
+    pub const RANK_7: u64 = 0x00FF000000000000;
+    pub const RANK_8: u64 = 0xFF00000000000000;
+
+    pub const FILE_A: u64 = 0x0101010101010101;
+    pub const FILE_B: u64 = 0x0202020202020202;
+    pub const FILE_C: u64 = 0x0404040404040404;
+    pub const FILE_D: u64 = 0x0808080808080808;
+    pub const FILE_E: u64 = 0x1010101010101010;
+    pub const FILE_F: u64 = 0x2020202020202020;
+    pub const FILE_G: u64 = 0x4040404040404040;
+    pub const FILE_H: u64 = 0x8080808080808080;
+}
+
 pub mod castling_rights {
     pub const WHITE_SHORT: u8 = 0b0001;
     pub const WHITE_LONG: u8 = 0b0010;
@@ -89,4 +109,8 @@ pub mod castling_rights {
     pub const WHITE_ALL: u8 = WHITE_SHORT | WHITE_LONG;
     pub const BLACK_ALL: u8 = BLACK_SHORT | BLACK_LONG;
     pub const ALL: u8 = WHITE_ALL | BLACK_ALL;
+}
+
+pub fn init() {
+    piece_move_gen::init_magic_info();
 }

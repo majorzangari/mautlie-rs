@@ -1,6 +1,6 @@
 use strum::IntoEnumIterator;
 
-use super::{Color, ColoredPiece, GenericPiece, hash::calculate_hash};
+use super::{Color, ColoredPiece, GenericPiece, board_move_gen::Move, fen, hash::calculate_hash};
 use crate::util::bithelpers::BitFunctions;
 
 #[derive(Debug, Clone)]
@@ -9,6 +9,7 @@ pub struct Board {
     pub occupied: [u64; 2],
     pub piece_table: [Option<GenericPiece>; 64],
     pub side_to_move: Color,
+    pub fullmove_clock: u16,
     pub state: BoardState,
     pub past_states: Vec<BoardState>,
 }
@@ -22,13 +23,15 @@ pub struct BoardState {
     pub hash: u64,
 }
 
-impl Default for Board {
-    fn default() -> Self {
+impl Board {
+    /// returns an empty board
+    pub fn empty() -> Self {
         Self {
             pieces: [0; 12],
             occupied: [0; 2],
             piece_table: [None; 64],
             side_to_move: Color::White,
+            fullmove_clock: 1,
             state: BoardState {
                 halfmove_clock: 0,
                 en_passant: 0,
@@ -39,9 +42,11 @@ impl Default for Board {
             past_states: Vec::new(),
         }
     }
-}
 
-impl Board {
+    pub fn default_setup() -> Self {
+        fen::fen_to_board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1").unwrap()
+    }
+
     /// update the occupied tables for both colors based on the bitboards
     pub fn update_occupied(&mut self) {
         self.occupied[Color::White as usize] = 0;
@@ -147,5 +152,9 @@ impl Board {
     #[cfg(not(debug_assertions))]
     pub fn check_representation(&self) {
         // no-op in release builds
+    }
+
+    pub fn make_move(&mut self, m: Move) -> Result<(), String> {
+        todo!()
     }
 }

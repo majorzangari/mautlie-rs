@@ -2,22 +2,23 @@ import random as rand
 import numpy as np
 
 RANK_1: np.uint64 = np.uint64(0x00000000000000FF)
-FILE_A: np.uint64 = np.uint64(0x8080808080808080)
 RANK_8: np.uint64 = np.uint64(0xFF00000000000000)
-FILE_H: np.uint64 = np.uint64(0x0101010101010101)
+FILE_A: np.uint64 = np.uint64(0x0101010101010101)
+FILE_H: np.uint64 = np.uint64(0x8080808080808080)
 
 
 def get_blocker_mask(square: int) -> np.uint64:
     rank, file = divmod(square, 8)
+
     rank_bb: np.uint64 = RANK_1 << (np.uint64(8) * np.uint64(rank))
-    file_bb: np.uint64 = FILE_H << np.uint64(file)
+    file_bb: np.uint64 = FILE_A << np.uint64(file)
     attacking_pieces = rank_bb | file_bb
 
     blockers = attacking_pieces
     if file != 7:
-        blockers &= ~FILE_A
-    if file != 0:
         blockers &= ~FILE_H
+    if file != 0:
+        blockers &= ~FILE_A
     if rank != 7:
         blockers &= ~RANK_8
     if rank != 0:
@@ -41,6 +42,7 @@ def bitset_subsets(bitset: np.uint64) -> list[np.uint64]:
 def get_rook_attacks(blockers: np.uint64, square: int) -> np.uint64:
     attacks = np.uint64(0)
     rank, file = divmod(square, 8)
+
     for r in range(rank + 1, 8):
         sq = r * 8 + file
         attacks |= np.uint64(1) << np.uint64(sq)
@@ -64,6 +66,7 @@ def get_rook_attacks(blockers: np.uint64, square: int) -> np.uint64:
         attacks |= np.uint64(1) << np.uint64(sq)
         if blockers & (np.uint64(1) << np.uint64(sq)):
             break
+
     return attacks
 
 
@@ -95,12 +98,12 @@ def find_magic(square: int) -> np.uint64:
             & np.uint64(rand.getrandbits(64))
             & np.uint64(rand.getrandbits(64))
         )
-        map = {}
+        table = {}
         for blocker in bitset_subsets(blocker_mask):
             index = (blocker * magic) >> (64 - index_bits)
-            if index not in map:
-                map[index] = attack_map[blocker]
-            elif map[index] != attack_map[blocker]:
+            if index not in table:
+                table[index] = attack_map[blocker]
+            elif table[index] != attack_map[blocker]:
                 fail = True
                 break
         if not fail:
