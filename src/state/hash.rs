@@ -99,9 +99,9 @@ pub fn calculate_hash(board: &Board) -> u64 {
 
     hash ^= get_castling_hash(board.state.castling_rights);
 
-    if board.state.en_passant != 0 {
-        let file = board.state.en_passant.trailing_zeros() as usize % 8;
-        hash ^= EN_PASSANT_HASH[file];
+    if let Some(sq) = board.state.en_passant {
+        let file = sq % 8;
+        hash ^= EN_PASSANT_HASH[file as usize];
     }
 
     hash

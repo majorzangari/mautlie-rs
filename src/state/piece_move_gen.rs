@@ -299,17 +299,17 @@ const fn generate_king_moves() -> [u64; 64] {
     out
 }
 
-pub fn get_knight_moves_bb(square: u8, friendly_occ: u64) -> u64 {
+pub fn get_knight_moves_bb(square: u32, friendly_occ: u64) -> u64 {
     debug_assert!(square < 64);
     KNIGHT_MOVES[square as usize] & !friendly_occ
 }
 
-pub fn get_king_moves_bb(square: u8, friendly_occ: u64) -> u64 {
+pub fn get_king_moves_bb(square: u32, friendly_occ: u64) -> u64 {
     debug_assert!(square < 64);
     KING_MOVES[square as usize] & !friendly_occ
 }
 
-pub fn get_bishop_moves_bb(square: u8, friendly_occ: u64, enemy_occ: u64) -> u64 {
+pub fn get_bishop_moves_bb(square: u32, friendly_occ: u64, enemy_occ: u64) -> u64 {
     debug_assert!(square < 64);
     let info = &BISHOP_MAGIC_INFO
         .get()
@@ -322,7 +322,7 @@ pub fn get_bishop_moves_bb(square: u8, friendly_occ: u64, enemy_occ: u64) -> u64
     info.attacks[index as usize]
 }
 
-pub fn get_rook_moves_bb(square: u8, friendly_occ: u64, enemy_occ: u64) -> u64 {
+pub fn get_rook_moves_bb(square: u32, friendly_occ: u64, enemy_occ: u64) -> u64 {
     debug_assert!(square < 64);
     let info = &ROOK_MAGIC_INFO
         .get()

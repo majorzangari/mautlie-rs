@@ -6,6 +6,12 @@ pub trait BitFunctions {
     fn clear_lsb(&mut self);
     fn contains(self, other: Self::Type) -> bool;
     fn count_set_bits(self) -> u32;
+    fn bit_for_each<F>(self, func: F)
+    where
+        F: FnMut(u32);
+    fn bit_for_all<F>(self, func: F) -> bool
+    where
+        F: FnMut(u32) -> bool;
 }
 
 macro_rules! impl_bit_functions {
@@ -38,6 +44,33 @@ macro_rules! impl_bit_functions {
             /// return the number of set bits
             fn count_set_bits(self) -> u32 {
                 self.count_ones()
+            }
+
+            /// runs func for each set bit, passing the index of the bit
+            fn bit_for_each<F>(self, mut func: F)
+            where
+                F: FnMut(u32),
+            {
+                let mut bb = self;
+                while bb != 0 {
+                    let lsb_index = bb.pop_lsb();
+                    func(lsb_index);
+                }
+            }
+
+            /// returns true if func returns true for all set bits, false otherwise
+            fn bit_for_all<F>(self, mut func: F) -> bool
+            where
+                F: FnMut(u32) -> bool,
+            {
+                let mut bb = self;
+                while bb != 0 {
+                    let lsb_index = bb.pop_lsb();
+                    if !func(lsb_index) {
+                        return false;
+                    }
+                }
+                true
             }
         }
     };

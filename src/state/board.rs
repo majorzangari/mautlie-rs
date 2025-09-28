@@ -1,6 +1,8 @@
 use strum::IntoEnumIterator;
 
+use super::board_move_gen::generate_moves;
 use super::{Color, ColoredPiece, GenericPiece, board_move_gen::Move, fen, hash::calculate_hash};
+use super::{game_constants, piece_move_gen};
 use crate::util::bithelpers::BitFunctions;
 
 #[derive(Debug, Clone)]
@@ -17,7 +19,7 @@ pub struct Board {
 #[derive(Debug, Clone)]
 pub struct BoardState {
     pub halfmove_clock: u16,
-    pub en_passant: u64,
+    pub en_passant: Option<u8>,
     pub castling_rights: u8,
     pub captured_piece: Option<GenericPiece>,
     pub hash: u64,
@@ -34,7 +36,7 @@ impl Board {
             fullmove_clock: 1,
             state: BoardState {
                 halfmove_clock: 0,
-                en_passant: 0,
+                en_passant: None,
                 castling_rights: 0,
                 captured_piece: None,
                 hash: 0,
@@ -88,12 +90,12 @@ impl Board {
         for piece in ColoredPiece::iter() {
             calculated_occupied[piece.color() as usize] |= self.pieces[piece as usize];
         }
-        debug_assert_eq!(
+        assert_eq!(
             self.occupied[Color::White as usize],
             calculated_occupied[Color::White as usize],
             "White occupied bitboard does not match pieces"
         );
-        debug_assert_eq!(
+        assert_eq!(
             self.occupied[Color::Black as usize],
             calculated_occupied[Color::Black as usize],
             "Black occupied bitboard does not match pieces"
@@ -121,26 +123,29 @@ impl Board {
             .zip(calculated_piece_table.iter())
             .enumerate()
         {
-            debug_assert_eq!(
+            assert_eq!(
                 state_square, calc_square,
                 "Piece table does not match pieces at index {}. state = {:?}, calculated = {:?}",
                 i, state_square, calc_square
             );
         }
 
-        debug_assert!(
-            self.state.en_passant.count_set_bits() <= 1,
-            "Multiple en passant square set: {:b}",
+        assert!(
+            match self.state.en_passant {
+                Some(sq) => sq < 64,
+                None => true,
+            },
+            "En passant square out of range: {:?}",
             self.state.en_passant
         );
 
-        debug_assert!(
+        assert!(
             !self.state.castling_rights.contains(0xF0),
             "Invalid castling rights: {:b}",
             self.state.castling_rights
         );
 
-        debug_assert_eq!(
+        assert_eq!(
             self.state.hash,
             calculate_hash(self),
             "Incorrect hash. state = {}, calculated = {}",
@@ -154,7 +159,66 @@ impl Board {
         // no-op in release builds
     }
 
+    pub fn generate_moves(&self) -> Vec<Move> {
+        generate_moves(self)
+    }
+
     pub fn make_move(&mut self, m: Move) -> Result<(), String> {
         todo!()
+    }
+
+    /// returns true if the given index is under attack by any piece of the given color
+    /// does not consider en passant
+    pub fn index_in_check(&self, index: u32, by_color: Color) -> bool {
+        let friendly = self.occupied[Color::opposite(by_color) as usize];
+        let enemy = self.occupied[by_color as usize];
+
+        let potential_rook_attacks = piece_move_gen::get_rook_moves_bb(index, friendly, enemy);
+        let rooks_and_queens = self.pieces
+            [ColoredPiece::from_parts(by_color, GenericPiece::Rook) as usize]
+            | self.pieces[ColoredPiece::from_parts(by_color, GenericPiece::Queen) as usize];
+        if rooks_and_queens.contains(potential_rook_attacks) {
+            return true;
+        }
+
+        let potential_bishop_attacks = piece_move_gen::get_bishop_moves_bb(index, friendly, enemy);
+        let bishops_and_queens = self.pieces
+            [ColoredPiece::from_parts(by_color, GenericPiece::Bishop) as usize]
+            | self.pieces[ColoredPiece::from_parts(by_color, GenericPiece::Queen) as usize];
+        if bishops_and_queens.contains(potential_bishop_attacks) {
+            return true;
+        }
+
+        let potential_knight_attacks = piece_move_gen::get_knight_moves_bb(index, friendly);
+        let knights =
+            self.pieces[ColoredPiece::from_parts(by_color, GenericPiece::Knight) as usize];
+        if knights.contains(potential_knight_attacks) {
+            return true;
+        }
+
+        let potential_king_attacks = piece_move_gen::get_king_moves_bb(index, friendly);
+        let king = self.pieces[ColoredPiece::from_parts(by_color, GenericPiece::King) as usize];
+        if king.contains(potential_king_attacks) {
+            return true;
+        }
+
+        let index_bb = 1u64 << index;
+        let pawns = self.pieces[ColoredPiece::from_parts(by_color, GenericPiece::Pawn) as usize];
+        let potential_pawn_attacks = match by_color {
+            Color::White => {
+                ((index_bb >> 9) & !game_constants::FILE_H)
+                    | ((index_bb >> 7) & !game_constants::FILE_A)
+            }
+            Color::Black => {
+                ((index_bb << 7) & !game_constants::FILE_H)
+                    | ((index_bb << 9) & !game_constants::FILE_A)
+            }
+        };
+
+        if pawns.contains(potential_pawn_attacks) {
+            return true;
+        }
+
+        false
     }
 }

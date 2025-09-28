@@ -25,6 +25,15 @@ pub enum Color {
     Black = 1,
 }
 
+impl Color {
+    pub fn opposite(self) -> Self {
+        match self {
+            Color::White => Color::Black,
+            Color::Black => Color::White,
+        }
+    }
+}
+
 #[repr(usize)]
 #[derive(Debug, Clone, Copy, EnumIter)]
 pub enum ColoredPiece {
@@ -79,6 +88,11 @@ impl ColoredPiece {
             _ => None,
         }
     }
+
+    pub fn from_parts(color: Color, generic: GenericPiece) -> Self {
+        let index = (generic as usize) * 2 + (color as usize);
+        ColoredPiece::from_index(index).unwrap()
+    }
 }
 
 pub mod game_constants {
@@ -101,6 +115,10 @@ pub mod game_constants {
     pub const FILE_H: u64 = 0x8080808080808080;
 }
 
+pub mod move_gen_constants {
+    pub const MAX_PSEUDO_LEGAL_MOVES: usize = 256;
+}
+
 pub mod castling_rights {
     pub const WHITE_SHORT: u8 = 0b0001;
     pub const WHITE_LONG: u8 = 0b0010;
@@ -109,6 +127,17 @@ pub mod castling_rights {
     pub const WHITE_ALL: u8 = WHITE_SHORT | WHITE_LONG;
     pub const BLACK_ALL: u8 = BLACK_SHORT | BLACK_LONG;
     pub const ALL: u8 = WHITE_ALL | BLACK_ALL;
+    pub const NONE: u8 = 0b0000;
+
+    pub const WHITE_SHORT_CLEARANCE_MASK: u64 = 0b1100000;
+    pub const WHITE_LONG_CLEARANCE_MASK: u64 = 0b1110;
+    pub const BLACK_SHORT_CLEARANCE_MASK: u64 = WHITE_SHORT_CLEARANCE_MASK << 56;
+    pub const BLACK_LONG_CLEARANCE_MASK: u64 = WHITE_LONG_CLEARANCE_MASK << 56;
+
+    pub const WHITE_SHORT_CHECK_MASK: u64 = 0b1110000;
+    pub const WHITE_LONG_CHECK_MASK: u64 = 0b11110;
+    pub const BLACK_SHORT_CHECK_MASK: u64 = WHITE_SHORT_CHECK_MASK << 56;
+    pub const BLACK_LONG_CHECK_MASK: u64 = WHITE_LONG_CHECK_MASK << 56;
 }
 
 pub fn init() {

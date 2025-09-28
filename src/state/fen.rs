@@ -1,6 +1,7 @@
 use crate::state::ColoredPiece;
 
 use super::board::Board;
+use super::board_move_gen;
 use super::{Color, castling_rights};
 
 /// parse a FEN string and return a Board representation
@@ -113,7 +114,7 @@ fn parse_fen_castling_rights(board: &mut Board, rights: &str) -> Result<(), Stri
 /// parse the en passant target square part of a FEN string and update the board accordingly
 fn parse_fen_en_passant(board: &mut Board, en_passant: &str) -> Result<(), String> {
     if en_passant == "-" {
-        board.state.en_passant = 0;
+        board.state.en_passant = None;
         return Ok(());
     }
     let file = en_passant
@@ -132,7 +133,11 @@ fn parse_fen_en_passant(board: &mut Board, en_passant: &str) -> Result<(), Strin
         .ok_or("Invalid file in en passant")?;
     let rank_index = rank.to_digit(10).ok_or("Invalid rank in en passant")? as usize;
     let square_index = rank_index * 8 + file_index;
-    board.state.en_passant = 1 << square_index;
+    if square_index > 63 {
+        return Err("En passant square out of bounds".to_string());
+    }
+
+    board.state.en_passant = Some(square_index as u8);
     Ok(())
 }
 
